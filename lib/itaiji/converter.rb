@@ -1,12 +1,24 @@
 module Itaiji
   class Converter
-    def seijitai(string)
-      itaiji_list.inject(string) do |string, itaiji_set|
-        seijitai = itaiji_set.keys.first
-        itaijis  = itaiji_set.values.first
-
-        string.gsub(/#{itaijis.join('|')}/, seijitai)
+    def itaiji2seijitai
+      @@itaiji2seijitai ||= begin
+        itaiji_list.each_with_object({}) do |itaiji_set, m|
+          seijitai = itaiji_set.keys.first
+          itaiji_set.values.first.each{|itaiji|
+            m[itaiji] = seijitai
+          }
+        end.freeze
       end
+    end
+
+    def itaiji_pattern
+      @@itaiji_pattern ||= begin
+         /#{itaiji_list.map(&:values).flatten.join('|')}/
+      end.freeze
+    end
+
+    def seijitai(string)
+      string.gsub(itaiji_pattern, itaiji2seijitai)
     end
 
     def convert_seijitai(string)
@@ -33,7 +45,7 @@ module Itaiji
     private
 
     def itaiji_list
-      [
+      @@itaiji_list ||= [
         { '亜' => ['亞'] },
         { '唖' => ['啞','瘂'] },
         { '悪' => ['惡'] },
@@ -1117,7 +1129,7 @@ module Itaiji
         { '惧' => ['懼'] },
         { '芻' => ['蒭'] },
         { '襪' => ['韈'] }
-      ]
+      ].freeze
     end
   end
 end
